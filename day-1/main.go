@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 )
 
 func check(e error) {
@@ -28,41 +27,32 @@ func stringToNum(s string, index *int) (string, bool) {
 		"nine":  "9",
 	}
 
-	for wordNum, charNum := range stringToNumMap {
-		numIndex := strings.Index(s[*index:], wordNum)
-		if numIndex > -1 {
-			fmt.Println(*index, numIndex, s[*index:*index+len(wordNum)], s)
-			// fmt.Println(*index, numIndex, s[*index:*index+len(wordNum)])
-			*index = (*index + numIndex + len(wordNum) - 1)
-			return charNum, true
+	for i := *index; i < len(s); i++ {
+		for j := i + 1; j <= len(s); j++ {
+			value, ok := stringToNumMap[s[i:j]]
+
+			// fmt.Println(i, j, value, s[i:j], s)
+			if ok {
+				fmt.Println(i, j, value, s[i:j], s)
+				if j < len(s)-1 && !isNumeric(string(s[j+1])) {
+					*index = j - 2
+				} else {
+					*index = j - 1
+				}
+				// fmt.Printf("index: %d\n", *index)
+				return value, true
+			}
 		}
 	}
 
-	// substring := []rune(s[index : len(s)-1])
-
-	// var substring string
-	// for i := *index; i < len(s); i++ {
-	// 	substring = s[*index:i]
-
-	// 	num, ok := stringToNumMap[substring]
-	// 	fmt.Println(substring)
-	// 	if ok {
-	// 		*index = i
-	// 		return num, true
-	// 	}
-
-	// 	if isNumeric(s[i:i]) {
-	// 		*index = i
-	// 		return "", false
-	// 	}
-	// }
-
-	// no string num
 	return "", false
 }
 
 func isNumeric(s string) bool {
-	_, err := strconv.ParseFloat(s, 64)
+	_, err := strconv.ParseInt(s, 10, 64)
+	// if err != nil {
+	// 	fmt.Printf("Number: %d\n", num)
+	// }
 	return err == nil
 }
 
@@ -93,6 +83,7 @@ func main() {
 					lastNum = string(char)
 				}
 			} else {
+				// fmt.Printf("index: %d\n", i)
 				numStr, isNum := stringToNum(fileScanner.Text(), &i)
 				// fmt.Println(numStr)
 				if isNum && firstNum == "" {
@@ -100,18 +91,21 @@ func main() {
 				} else if isNum && firstNum != "" {
 					lastNum = numStr
 				}
+				// fmt.Printf("index after: %d\n", i)
 			}
 		}
 
 		if firstNum != "" && lastNum != "" {
 			numVal, _ := strconv.Atoi(firstNum + lastNum)
+			// fmt.Printf("numVal: %d\n", numVal)
 			totalNum += numVal
 		} else if firstNum != "" {
 			numVal, _ := strconv.Atoi(firstNum + firstNum)
+			// fmt.Printf("numVal: %d\n", numVal)
 			totalNum += numVal
 		}
 		// fmt.Println()
-		fmt.Printf("%s%s \n", firstNum, lastNum)
+		// fmt.Printf("%s%s \n", firstNum, lastNum)
 		// break
 	}
 	fmt.Printf("Total number: %d\n", totalNum)
